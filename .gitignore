@@ -1,0 +1,6 @@
+.gradle
+.idea
+build/
+geckodriver
+geckodriver.*
+src-gen/
