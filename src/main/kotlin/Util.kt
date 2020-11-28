@@ -1,6 +1,8 @@
 import models.FbPost
 import java.io.File
 import java.net.URI
+import java.net.URISyntaxException
+import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -39,7 +41,7 @@ object Util {
         }
 
         Files.writeString(path, pageSource)
-        println("wrote to $path")
+        println("write to: $path")
         return path.toAbsolutePath().toString()
     }
 
@@ -74,5 +76,49 @@ object Util {
 
         Files.writeString(path, builder.toString())
         println("wrote to CSV file $path")
+    }
+
+    fun isTwitterPath(link: String): Boolean {
+        if (isValidUrl(link)) {
+            val uri = URI(link)
+            return uri.host == "twitter.com" || uri.host == "www.twitter.com"
+        }
+
+        if (isHtmlFile(link)) {
+            val path = Paths.get(link)
+            for (item in path.iterator()) {
+                if (item.toString() == "twitter_com" || item.toString() == "www_twitter_com") {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    fun isValidUrl(path: String): Boolean {
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+            return try {
+                val url = URL(path);
+                url.toURI()
+                true
+            } catch (ex: URISyntaxException) {
+                false
+            }
+        }
+
+        return false
+    }
+
+    fun isHtmlFile(path: String): Boolean {
+        return !isValidUrl(path) && (path.endsWith(".html") || path.endsWith(".htm"))
+    }
+
+    fun tryExec(function: () -> Unit): Boolean {
+        try {
+            function.invoke()
+            return true;
+        } catch (ex: java.lang.Exception) {}
+        return false;
     }
 }

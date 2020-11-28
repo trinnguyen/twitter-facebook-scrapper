@@ -7,7 +7,6 @@ import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-
     // parse and validate
     val opts = createOptions()
     val cli = parseCli(opts, args) ?: exitProcess(1)
@@ -26,13 +25,19 @@ fun main(args: Array<String>) {
 }
 
 fun process(cli: CommandLine, path: String): Boolean {
-    val isTwitter = cli.hasOption('t') && cli.getOptionValue('t') == "twitter"
+    // detect twitter or facebook
+    val isTwitter = if (cli.hasOption('t')) {
+        cli.getOptionValue('t') == "twitter"
+    } else {
+        Util.isTwitterPath(path)
+    }
 
-    if (isValidUrl(path)) {
+    // check if scrapping or parsing
+    if (Util.isValidUrl(path)) {
         return scrapPage(isTwitter, cli, path)
     }
 
-    if (isHtmlFile(path)) {
+    if (Util.isHtmlFile(path)) {
         return parsePage(isTwitter, path)
     }
 
@@ -84,29 +89,13 @@ fun ensureValidArgs(cli: CommandLine): String? {
         return "missing URL or HTML file path"
 
     val path = cli.argList.first()
-    if (!isValidUrl(path) && !isHtmlFile(path))
+    if (!Util.isValidUrl(path) && !Util.isHtmlFile(path))
         return "a valid URL or HTML file path must be specified, example: https://twitter.com/samsung"
 
     return null
 }
 
-fun isValidUrl(path: String): Boolean {
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-        return try {
-            val url = URL(path);
-            url.toURI()
-            true
-        } catch (ex: URISyntaxException) {
-            false
-        }
-    }
 
-    return false
-}
-
-fun isHtmlFile(path: String): Boolean {
-    return Files.exists(Paths.get(path)) && (path.endsWith(".html") || path.endsWith(".htm"))
-}
 
 fun printError(s: String) {
     System.err.println("error: $s")
