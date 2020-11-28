@@ -40,12 +40,12 @@ class FbPageParser: PageParser {
 
             // comments
             val comments = try {
-                commentableItem.select("a:contains(Comments)")?.firstOrNull()?.text()?.replace("Comments", "")?.toInt() ?: 0
+                commentableItem.select("a:contains(Comments)")?.firstOrNull()?.text()?.replace("Comments", "")?.trim()?.toInt() ?: 0
             } catch (ex: Exception) { 0 }
 
             // share
             val shares = try {
-                commentableItem.select("a:contains(Shares)")?.firstOrNull()?.text()?.replace("Shares", "")?.toInt() ?: 0
+                commentableItem.select("a:contains(Shares)")?.firstOrNull()?.text()?.replace("Shares", "")?.trim()?.toInt() ?: 0
             } catch (ex: Exception) { 0 }
 
             // item

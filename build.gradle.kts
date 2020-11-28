@@ -1,10 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 
 plugins {
     kotlin("jvm") version "1.4.10"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
     application
 }
 group = "com.trinnguyen"
@@ -26,9 +23,4 @@ tasks.withType<KotlinCompile>() {
 }
 application {
     mainClassName = "MainKt"
-}
-tasks.withType<ShadowJar> {
-    baseName = "app"
-    classifier = ""
-    version = ""
 }

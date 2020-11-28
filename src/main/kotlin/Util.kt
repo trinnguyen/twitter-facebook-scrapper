@@ -67,9 +67,9 @@ object Util {
     fun writeFbPostToCsv(items: MutableList<FbPost>, csvPath: String) {
         val path = Paths.get(csvPath)
         val builder = StringBuilder()
-        builder.append("Title,Date,Reacts,Comments,Shares").append(System.lineSeparator())
+        builder.append("Title,Date,Time,Reacts,Comments,Shares").append(System.lineSeparator())
         items.forEach {
-            builder.append("\"${it.title}\",${it.formattedTime()},${it.reacts},${it.comments},${it.shares}").append(System.lineSeparator())
+            builder.append("\"${it.title.replace("\"", "\"\"")}\",${it.formattedDate()},${it.formattedTime()},${it.reacts},${it.comments},${it.shares}").append(System.lineSeparator())
         }
 
         Files.writeString(path, builder.toString())
