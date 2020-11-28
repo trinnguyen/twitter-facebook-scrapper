@@ -142,4 +142,9 @@ fun parseCli(opts: Options, args: Array<String>): CommandLine? {
 
 fun printHelp(options: Options) {
     HelpFormatter().printHelp("fb-scrapper", options)
+
+    println("")
+    println("examples:")
+    println("  fb-scrapper -n 10 https://www.facebook.com/samsungelectronics")
+    println("  fb-scrapper src-gen/facebook_com/mashable/200.html")
 }
