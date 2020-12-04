@@ -13,8 +13,7 @@ repositories {
 }
 dependencies {
     testImplementation(kotlin("test-junit5"))
-    implementation("org.seleniumhq.selenium:selenium-chrome-driver:3.141.59")
-    implementation("org.seleniumhq.selenium:selenium-firefox-driver:4.0.0-alpha-7")
+    implementation("org.seleniumhq.selenium:selenium-firefox-driver:3.141.59")
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("commons-cli:commons-cli:1.4")
 }

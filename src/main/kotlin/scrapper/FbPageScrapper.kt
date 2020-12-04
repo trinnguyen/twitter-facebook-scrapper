@@ -1,6 +1,10 @@
-import org.openqa.selenium.By
+package scrapper
 
-class FbPageScrapper: PageScrapper() {
+import Util
+import org.openqa.selenium.By
+import parser.FbPageParser
+
+class FbPageScrapper : PageScrapper(FbPageParser()) {
 
     private var hideModalSuccess: Boolean = false
 

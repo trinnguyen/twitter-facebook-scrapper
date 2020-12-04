@@ -1,7 +1,11 @@
 import org.apache.commons.cli.*
+import parser.FbPageParser
+import scrapper.FbPageScrapper
+import parser.PageParser
+import parser.TwitterParser
+import scrapper.PageScrapper
+import scrapper.TwitterScrapper
 import java.io.File
-import java.net.URISyntaxException
-import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.system.exitProcess
@@ -57,23 +61,29 @@ fun scrapPage(isTwitter: Boolean, cli: CommandLine, path: String): Boolean {
     System.setProperty("webdriver.firefox.driver", child.toAbsolutePath().toString());
     System.setProperty("webdriver.firefox.profile", profileName);
 
-    val number = if (cli.hasOption('n')) {
-        cli.getOptionValue('n').toIntOrNull() ?: Int.MAX_VALUE
-    } else {
-        Int.MAX_VALUE
-    }
-    val scrapper: PageScrapper = if (isTwitter) TwitterScrapper() else FbPageScrapper()
-    val files = scrapper.exec(path, number)
-    if (files.isNullOrEmpty()) return false
+    val countCsv = getCountCsv(cli, 10)
 
-    // parse page
-    return parsePage(isTwitter, files.last())
+    val scrapper: PageScrapper = if (isTwitter) TwitterScrapper() else FbPageScrapper()
+    val file: String? = scrapper.exec(path, countCsv)
+    return !file.isNullOrEmpty()
+}
+
+fun getCountCsv(cli: CommandLine, def: Int): Int {
+    if (cli.hasOption('n')) {
+        return try {
+            val value = cli.getOptionValue('n')
+            value.toInt()
+        } catch (ex: Exception) {
+            def
+        }
+    }
+
+    return def
 }
 
 fun parsePage(isTwitter: Boolean, path: String): Boolean {
     val parser: PageParser = if (isTwitter) TwitterParser() else FbPageParser()
-    val csvPath = Util.getCsvFile(path) ?: return false
-    parser.parseToFile(path, csvPath)
+    parser.parseToCsv(path)
     return true
 }
 
@@ -103,7 +113,10 @@ fun printError(s: String) {
 
 fun createOptions(): Options {
     val options = Options()
-    options.addOption("n", true, "Number of scrolls. Default is infinitely")
+    options.addOption("n",
+        "type",
+        true,
+        "number of recent csv files to keep, default is 10")
     options.addOption("t",
         "type",
         true,
@@ -134,6 +147,6 @@ fun printHelp(options: Options) {
 
     println("")
     println("examples:")
-    println("  fb-scrapper -n 10 https://www.facebook.com/samsungelectronics")
+    println("  fb-scrapper -n 50 https://www.facebook.com/samsungelectronics")
     println("  fb-scrapper src-gen/facebook_com/mashable/200.html")
 }
