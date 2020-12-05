@@ -1,12 +1,12 @@
 package parser
 
-import Util
+import models.CsvRow
 import models.FbPost
 import org.jsoup.Jsoup
 
-class FbPageParser: PageParser {
+class FbPageParser: PageParser() {
 
-    override fun parseToCsv(source: String, csvPath: String): Boolean {
+    override fun parseToRows(source: String): List<CsvRow> {
         try {
             // get
             val doc = Jsoup.parse(source)
@@ -56,16 +56,11 @@ class FbPageParser: PageParser {
                 list.add(post)
             }
 
-            Util.writeFbPostToCsv(list, csvPath)
-            println("\t found ${list.size} Facebook posts")
-            if (list.isNotEmpty()) {
-                println("\t last post: ${list.last().formatCsv()}")
-            }
-            return true
+            return list
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
 
-        return false
+        return emptyList()
     }
 }

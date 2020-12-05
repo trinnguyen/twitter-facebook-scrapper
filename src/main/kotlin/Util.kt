@@ -1,4 +1,4 @@
-import models.FbPost
+import models.CsvRow
 import java.io.File
 import java.net.URI
 import java.net.URISyntaxException
@@ -59,7 +59,7 @@ object Util {
         return path
     }
 
-    fun writeFbPostToCsv(items: MutableList<FbPost>, csvPath: String) {
+    fun writeCsvRows(items: List<CsvRow>, csvPath: String) {
         val path = Paths.get(csvPath)
         val builder = StringBuilder()
         if (items.isNotEmpty()) {
@@ -70,19 +70,19 @@ object Util {
         }
 
         Files.writeString(path, builder.toString())
-        println("wrote to CSV file $path")
+        println("wrote CSV to file $path")
     }
 
     fun isTwitterPath(link: String): Boolean {
         if (isValidUrl(link)) {
             val uri = URI(link)
-            return uri.host == "twitter.com" || uri.host == "www.twitter.com"
+            return uri.host.endsWith("twitter.com", true)
         }
 
         if (isHtmlFile(link)) {
             val path = Paths.get(link)
             for (item in path.iterator()) {
-                if (item.toString() == "twitter_com" || item.toString() == "www_twitter_com") {
+                if (item.toString().endsWith("twitter_com", true)) {
                     return true
                 }
             }
