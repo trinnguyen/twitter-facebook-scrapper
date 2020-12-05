@@ -112,19 +112,19 @@ object Util {
         logInfo("")
     }
 
-    fun isTwitterPath(link: String): Boolean {
+    fun isTwitterUrl(link: String): Boolean {
         if (isValidUrl(link)) {
             val uri = URI(link)
             return uri.host.endsWith("twitter.com", true)
         }
 
-        if (isHtmlFile(link)) {
-            val path = Paths.get(link)
-            for (item in path.iterator()) {
-                if (item.toString().endsWith("twitter_com", true)) {
-                    return true
-                }
-            }
+        return false
+    }
+
+    fun isMobileFacebookUrl(link: String): Boolean {
+        if (isValidUrl(link)) {
+            val uri = URI(link)
+            return uri.host.equals("mbasic.facebook.com", true)
         }
 
         return false

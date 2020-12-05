@@ -1,17 +1,17 @@
+import ULogger.logInfo
 import org.apache.commons.cli.*
-import parser.FbPageParser
-import scrapper.FbPageScrapper
-import parser.PageParser
-import parser.TwitterParser
-import scrapper.PageScrapper
-import scrapper.TwitterScrapper
+import twitter4j.Paging
+import twitter4j.Status
+import twitter4j.TwitterException
+import twitter4j.TwitterFactory
+import twitter4j.conf.ConfigurationBuilder
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) {
 
+fun main(args: Array<String>) {
     // parse and validate
     val opts = createOptions()
     val cli = parseCli(opts, args) ?: exitProcess(1)
@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
 
     val path = cli.argList.first()
 
-    ULogger.setup(path)
+    Util.generateLogPath(path)?.let { ULogger.setup(it) }
 
     // scrap page
     if (!process(cli, path)) {
@@ -32,26 +32,24 @@ fun main(args: Array<String>) {
 }
 
 fun process(cli: CommandLine, path: String): Boolean {
-    // detect twitter or facebook
-    val isTwitter = if (cli.hasOption('t')) {
-        cli.getOptionValue('t') == "twitter"
-    } else {
-        Util.isTwitterPath(path)
-    }
 
     // check if scrapping or parsing
     if (Util.isValidUrl(path)) {
-        return scrapPage(isTwitter, cli, path)
+        return scrapPage(cli, path)
     }
 
     if (Util.isHtmlFile(path)) {
-        return parsePage(isTwitter, path)
+        // detect twitter or facebook
+        val provider = if (cli.hasOption('t')) cli.getOptionValue('t') else ""
+        val parser = Factory.createParser(provider)
+        parser.parseHtmlFileToCsv(path)
+        return true
     }
 
     return false
 }
 
-fun scrapPage(isTwitter: Boolean, cli: CommandLine, path: String): Boolean {
+fun scrapPage(cli: CommandLine, path: String): Boolean {
     val folder = File(File("").absolutePath)
     val child = Paths.get(folder.absolutePath, "geckodriver")
     if (!Files.exists(child)) {
@@ -64,30 +62,9 @@ fun scrapPage(isTwitter: Boolean, cli: CommandLine, path: String): Boolean {
     System.setProperty("webdriver.firefox.driver", child.toAbsolutePath().toString());
     System.setProperty("webdriver.firefox.profile", profileName);
 
-    val countCsv = getCountCsv(cli, 10)
-
-    val scrapper: PageScrapper = if (isTwitter) TwitterScrapper() else FbPageScrapper()
+    val scrapper = Factory.createScrapper(path)
     val file: String? = scrapper.exec(path)
     return !file.isNullOrEmpty()
-}
-
-fun getCountCsv(cli: CommandLine, def: Int): Int {
-    if (cli.hasOption('n')) {
-        return try {
-            val value = cli.getOptionValue('n')
-            value.toInt()
-        } catch (ex: Exception) {
-            def
-        }
-    }
-
-    return def
-}
-
-fun parsePage(isTwitter: Boolean, path: String): Boolean {
-    val parser: PageParser = if (isTwitter) TwitterParser() else FbPageParser()
-    parser.parseHtmlFileToCsv(path)
-    return true
 }
 
 fun ensureValidArgs(cli: CommandLine): String? {
@@ -116,10 +93,12 @@ fun printError(s: String) {
 
 fun createOptions(): Options {
     val options = Options()
-    options.addOption("t",
+    options.addOption(
+        "t",
         "type",
         true,
-        "'facebook' or 'twitter'. Default is 'facebook'")
+        "'facebook' or 'twitter'. Default is 'facebook'"
+    )
     options.addOption(
         "p",
         "profile",
@@ -148,5 +127,6 @@ fun printHelp(options: Options) {
     println("examples:")
     println("  fb-scrapper https://twitter.com/samsung")
     println("  fb-scrapper https://facebook.com/mashable")
+    println("  fb-scrapper -p FbScrapper https://facebook.com/mashable")
     println("  fb-scrapper src-gen/facebook_com/mashable/200.html")
 }

@@ -28,13 +28,11 @@ class UtilTest {
         value = [
             "https://www.twitter.com/samsung, true",
             "https://www.twitter.com/apple, true",
-            "src-gen/twitter_com/apple/tweets.html, true",
-            "src-gen/facebook_com/apple/posts.html, false",
             "https://facebook.com/apple, false"
         ]
     )
     fun isTwitterPath(input: String, result: Boolean) {
-        assertEquals(result, Util.isTwitterPath(input))
+        assertEquals(result, Util.isTwitterUrl(input))
     }
 
     @ParameterizedTest

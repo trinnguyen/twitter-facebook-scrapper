@@ -19,6 +19,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("commons-cli:commons-cli:1.4")
     implementation("ch.qos.logback:logback-classic:1.3.0-alpha5")
+    implementation("org.twitter4j:twitter4j-core:4.0.7")
 }
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"

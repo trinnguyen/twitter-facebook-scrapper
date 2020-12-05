@@ -11,8 +11,7 @@ object ULogger {
 
     lateinit var logger: ch.qos.logback.classic.Logger
 
-    fun setup(path: String) {
-        val logPath = Util.generateLogPath(path)
+    fun setup(logPath: String) {
         println("logging to $logPath")
 
         val ctx = LoggerFactory.getILoggerFactory() as LoggerContext

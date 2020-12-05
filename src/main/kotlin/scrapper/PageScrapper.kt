@@ -1,19 +1,19 @@
 package scrapper
 
 import ULogger.logInfo
+import Util
 import models.CsvRow
 import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.WebDriver
 import org.openqa.selenium.firefox.FirefoxDriver
 import parser.PageParser
 
 abstract class PageScrapper(val parser: PageParser) {
-    protected val driver: WebDriver = FirefoxDriver()
+    protected lateinit var driver: FirefoxDriver
 
-    fun exec(url: String): String? {
+    open fun exec(url: String): String? {
+        driver = FirefoxDriver()
         val cachedIds = mutableSetOf<String>()
-        val fileName = Util.generateFileNameByTime("csv")
-        val path = Util.generatePathFromUrl(url, fileName) ?: return null
+        val path = Util.generatePathFromUrl(url, Util.generateFileNameByTime("csv")) ?: return null
 
         logInfo("start scrapping $url to $path")
 
@@ -26,7 +26,6 @@ abstract class PageScrapper(val parser: PageParser) {
 
             // scroll and save to files
             val js = driver as JavascriptExecutor
-            var count = 1
             var countFailed = 0
             while (true) {
 
@@ -45,15 +44,14 @@ abstract class PageScrapper(val parser: PageParser) {
                 }
 
                 // scroll to next
-                val y = count++ * 2000
-                js.executeScript("window.scrollBy(0,$y)")
+                js.executeScript("window.scrollBy(0,document.body.scrollHeight)")
                 Thread.sleep(1500)
             }
 
         } catch (ex: Exception) {
             ex.printStackTrace()
         } finally {
-            driver.quit()
+             driver.quit()
         }
 
         return path
@@ -64,7 +62,7 @@ abstract class PageScrapper(val parser: PageParser) {
         // process every single scroll
         val items: List<CsvRow> = parser.parseToRows(getSource())
         val newItems = items.filter { i -> !cachedIds.contains(i.id) }.sortedByDescending { i -> i.instant }
-        logInfo("found ${newItems.size} new items, total: ${cachedIds.size + newItems.size} ")
+        logInfo("found ${newItems.size} new items")
         if (newItems.isEmpty())
             return false
 
@@ -75,6 +73,7 @@ abstract class PageScrapper(val parser: PageParser) {
         }
 
         // append to csv file
+        logInfo("total ${cachedIds.size}")
         Util.appendCsvRowsToFile(newItems, path)
         return true
     }
