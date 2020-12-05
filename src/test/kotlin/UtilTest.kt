@@ -1,16 +1,22 @@
 import Util.normalizeNumber
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import java.nio.file.Paths
 
 class UtilTest {
 
-    @Test
-    fun generatePathFromFile() {
-        assertEquals("/home/tmp/a.csv", Util.generatePathFromFile("/home/tmp/a.html", "csv"))
-        assertEquals("src-gen/a.csv", Util.generatePathFromFile("src-gen/a.html", "csv"))
-        assertEquals(null, Util.generatePathFromFile("", "csv"))
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "/home/tmp/a.html, /home/tmp/a.csv",
+            "src-gen/a.html, src-gen/a.csv"
+        ]
+    )
+    fun generatePathFromFile(input: String, expected: String) {
+        val result = Util.generatePathFromFile(input, "csv")
+        assertNotNull(result)
+        assertEquals(Paths.get(expected).toAbsolutePath().toString(), Paths.get(result).toAbsolutePath().toString())
     }
 
     @ParameterizedTest
@@ -45,8 +51,10 @@ class UtilTest {
             "src-gen/facebook_com/apple/posts.html, src-gen/facebook_com/apple/posts.log",
         ]
     )
-    fun generateLogPath(input: String, result: String) {
-        assertEquals(result, Util.generateLogPath(input))
+    fun generateLogPath(input: String, expected: String) {
+        assertEquals(
+            Paths.get(expected).toAbsolutePath().toString(),
+            Paths.get(Util.generateLogPath(input)).toAbsolutePath().toString())
     }
 
     @ParameterizedTest
