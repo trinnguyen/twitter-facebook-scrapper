@@ -14,11 +14,23 @@ import java.time.format.DateTimeFormatter
 
 
 object Util {
-    private const val DriverPath = "https://github.com/mozilla/geckodriver/releases/download/v0.28.0/geckodriver-v0.28.0-macos.tar.gz"
+    private const val FirefoxDriverPath = "https://github.com/mozilla/geckodriver/releases/download/v0.28.0/geckodriver-v0.28.0-macos.tar.gz"
+
+    private const val ChromeDriverPath = "https://chromedriver.storage.googleapis.com/87.0.4280.88/chromedriver_mac64.zip"
 
     fun downloadGeckoDriver(folder: File): Boolean {
         val filename = "geckodriver.tar.gz"
-        val cmdList = listOf("/bin/sh", "-c", "curl -L $DriverPath -o $filename && tar -xf $filename")
+        val cmdList = listOf("/bin/sh", "-c", "curl -L $FirefoxDriverPath -o $filename && tar -xf $filename")
+        return downloadDriverDriver(cmdList, folder)
+    }
+
+    fun downloadChromeDriver(folder: File): Boolean {
+        val filename = "chromedriver_mac64.zip"
+        val cmdList = listOf("/bin/sh", "-c", "curl -L $ChromeDriverPath -o $filename && unzip $filename")
+       return downloadDriverDriver(cmdList, folder)
+    }
+
+    fun downloadDriverDriver(cmdList: List<String>, folder: File): Boolean {
         val result = ProcessBuilder(cmdList)
             .directory(folder)
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)

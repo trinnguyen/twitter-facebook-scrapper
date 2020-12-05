@@ -4,14 +4,14 @@ import ULogger.logInfo
 import Util
 import models.CsvRow
 import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.WebDriver
 import parser.PageParser
 
 abstract class PageScrapper(val parser: PageParser) {
-    protected lateinit var driver: FirefoxDriver
+    protected lateinit var driver: WebDriver
 
-    open fun exec(url: String): String? {
-        driver = FirefoxDriver()
+    open fun exec(url: String, provider: () -> WebDriver): String? {
+        this.driver = provider()
         val cachedIds = mutableSetOf<String>()
         val path = Util.generatePathFromUrl(url, Util.generateFileNameByTime("csv")) ?: return null
 
@@ -19,13 +19,13 @@ abstract class PageScrapper(val parser: PageParser) {
 
         beforeStarting()
         try {
-            driver.get(normalizeUrl(url));
+            this.driver.get(normalizeUrl(url));
 
             // wait for page to load
             Thread.sleep(2000)
 
             // scroll and save to files
-            val js = driver as JavascriptExecutor
+            val js = this.driver as JavascriptExecutor
             var countFailed = 0
             while (true) {
 
@@ -44,17 +44,25 @@ abstract class PageScrapper(val parser: PageParser) {
                 }
 
                 // scroll to next
-                js.executeScript("window.scrollBy(0,document.body.scrollHeight)")
-                Thread.sleep(1500)
+                scroll(js)
+                Thread.sleep(getDelayMiliSeconds())
             }
 
         } catch (ex: Exception) {
             ex.printStackTrace()
         } finally {
-             driver.quit()
+             this.driver.quit()
         }
 
         return path
+    }
+
+    open fun getDelayMiliSeconds(): Long {
+        return 1500
+    }
+
+    protected open fun scroll(js: JavascriptExecutor) {
+        js.executeScript("window.scrollBy(0,document.body.scrollHeight)")
     }
 
     protected open fun normalizeUrl(url: String): String {

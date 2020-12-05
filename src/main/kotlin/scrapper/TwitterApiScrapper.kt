@@ -5,6 +5,7 @@ import ULogger.logException
 import ULogger.logInfo
 import Util
 import models.Tweet
+import org.openqa.selenium.WebDriver
 import parser.TwitterParser
 import twitter4j.*
 import twitter4j.conf.ConfigurationBuilder
@@ -18,7 +19,7 @@ class TwitterApiScrapper : PageScrapper(TwitterParser()){
         return ""
     }
 
-    override fun exec(url: String): String? {
+    override fun exec(url: String, provider: () -> WebDriver): String? {
 
         // read config file
         val cb = updateTokens() ?: return null

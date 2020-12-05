@@ -3,5 +3,6 @@
 build/
 geckodriver
 geckodriver.*
+chromedriver
 src-gen/
 tokens.txt

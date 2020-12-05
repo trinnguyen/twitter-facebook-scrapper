@@ -2,8 +2,6 @@ import models.ProcessType
 import models.toProcessType
 import org.apache.commons.cli.*
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 
@@ -46,19 +44,10 @@ fun process(cli: CommandLine, path: String): Boolean {
 
 fun scrapPage(cli: CommandLine, path: String): Boolean {
     val folder = File(File("").absolutePath)
-    val child = Paths.get(folder.absolutePath, "geckodriver")
-    if (!Files.exists(child)) {
-        ULogger.logInfo("geckodriver is not exist, auto download to ${child}")
-        if (!Util.downloadGeckoDriver(folder))
-            return false
-    }
-
-    val profileName = cli.getOptionValue('p', "FbScrapper")
-    System.setProperty("webdriver.firefox.driver", child.toAbsolutePath().toString());
-    System.setProperty("webdriver.firefox.profile", profileName);
+    val driver = Factory.createWebDriver(cli, folder)
 
     val scrapper = Factory.createScrapper(cli.getProcessType(), path)
-    val file: String? = scrapper.exec(path)
+    val file: String? = scrapper.exec(path, driver)
     return !file.isNullOrEmpty()
 }
 
@@ -89,16 +78,17 @@ fun createOptions(): Options {
     val options = Options()
     options.addOption(
         "t",
-        "type",
         true,
         "Value: facebook, twitter, twitter-api, twitter-search"
     )
     options.addOption(
         "p",
-        "profile",
         true,
         "Firefox profile name, use about:profiles on Firefox and create new profile. Default is 'FbScrapper'"
     )
+    options.addOption("d",
+        true,
+        "Use 'chrome' or 'firefox'. Default is 'firefox'")
     return options
 }
 
@@ -127,4 +117,8 @@ fun printHelp(options: Options) {
 
 fun CommandLine.getProcessType(): ProcessType {
     return this.getOptionValue('t', "").toProcessType()
+}
+
+fun CommandLine.isChromeDriver(): Boolean {
+    return this.getOptionValue('d', "firefox").equals("chrome", true)
 }
