@@ -7,14 +7,15 @@ import org.jsoup.Jsoup
 class FbPageParser: PageParser() {
 
     override fun parseToRows(source: String): List<CsvRow> {
-        var id = 1
         try {
             // get
             val doc = Jsoup.parse(source)
-            val elements = doc.select(".userContentWrapper")
+            val elements = doc.select("div[role='article']")
 
             val list = mutableListOf<FbPost>()
             for (elem in elements) {
+                val id: String = elem.attr("id")
+
                 // title
                 val title = elem.select(".userContent p").firstOrNull()?.text() ?: continue
 
@@ -53,7 +54,7 @@ class FbPageParser: PageParser() {
                 }
 
                 // item
-                val post = FbPost("${id++}", title, time, reacts, comments, shares)
+                val post = FbPost(id, title, time, reacts, comments, shares)
                 list.add(post)
             }
 

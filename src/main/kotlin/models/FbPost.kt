@@ -19,10 +19,10 @@ class FbPost(id: String, val title: String, epochTime: Long, val reacts: Int, va
     }
 
     override fun header(): String {
-        return "Title,Date,Time,Reacts,Comments,Shares"
+        return "Title,Date,Time,Reacts,Comments,Shares,Id"
     }
 
     override fun formatCsv(): String {
-        return "\"${title.replace("\"", "\"\"")}\",${formattedDate()},${formattedTime()},${reacts},${comments},${shares}"
+        return "\"${title.replace("\"", "\"\"")}\",${formattedDate()},${formattedTime()},${reacts},${comments},${shares},$id"
     }
 }

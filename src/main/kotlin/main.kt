@@ -116,10 +116,6 @@ fun printError(s: String) {
 
 fun createOptions(): Options {
     val options = Options()
-    options.addOption("n",
-        "type",
-        true,
-        "number of recent csv files to keep, default is 10")
     options.addOption("t",
         "type",
         true,
@@ -150,7 +146,7 @@ fun printHelp(options: Options) {
 
     println("")
     println("examples:")
-    println("  fb-scrapper https://twitter/samsung")
-    println("  fb-scrapper -n 50 https://www.facebook.com/samsungelectronics")
+    println("  fb-scrapper https://twitter.com/samsung")
+    println("  fb-scrapper https://facebook.com/mashable")
     println("  fb-scrapper src-gen/facebook_com/mashable/200.html")
 }
