@@ -1,5 +1,6 @@
 package parser
 
+import Util.normalizeNumber
 import models.CsvRow
 import models.FbPost
 import org.jsoup.Jsoup
@@ -30,31 +31,16 @@ class FbPageParser: PageParser() {
                 val commentableItem = elem.select(".commentable_item")
 
                 // reactions
-                val reacts = try {
-                    commentableItem.select("a[data-testid=UFI2ReactionsCount/root] span")?.firstOrNull()?.text()
-                        ?.toInt() ?: 0
-                } catch (ex: Exception) {
-                    0
-                }
+                val reacts = commentableItem.select("a[data-testid=UFI2ReactionsCount/root] span")?.firstOrNull()?.text()
 
                 // comments
-                val comments = try {
-                    commentableItem.select("a:contains(Comments)")?.firstOrNull()?.text()?.replace("Comments", "")
-                        ?.trim()?.toInt() ?: 0
-                } catch (ex: Exception) {
-                    0
-                }
+                val comments = commentableItem.select("a:contains(Comments)")?.firstOrNull()?.text()?.replace("Comments", "")
 
                 // share
-                val shares = try {
-                    commentableItem.select("a:contains(Shares)")?.firstOrNull()?.text()?.replace("Shares", "")?.trim()
-                        ?.toInt() ?: 0
-                } catch (ex: Exception) {
-                    0
-                }
+                val shares = commentableItem.select("a:contains(Shares)")?.firstOrNull()?.text()?.replace("Shares", "")?.trim()
 
                 // item
-                val post = FbPost(id, title, time, reacts, comments, shares)
+                val post = FbPost(id, title, time, reacts.normalizeNumber(), comments.normalizeNumber(), shares.normalizeNumber())
                 list.add(post)
             }
 

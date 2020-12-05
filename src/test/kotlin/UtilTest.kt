@@ -1,3 +1,4 @@
+import Util.normalizeNumber
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -47,4 +48,24 @@ class UtilTest {
     fun generateLogPath(input: String, result: String) {
         assertEquals(result, Util.generateLogPath(input))
     }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "1, 1",
+            "0, 0",
+            "1K, 1000",
+            "2K, 2000",
+            "10K, 10000",
+            "11.76K, 11760",
+            "1.76K, 1760",
+            "210K, 210000",
+            "1M, 1000000",
+            "4.3M, 4300000",
+        ]
+    )
+    fun normalizeNumber(input: String, expected: String) {
+        assertEquals(expected, input.normalizeNumber())
+    }
+
 }

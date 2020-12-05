@@ -6,7 +6,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
-class FbPost(id: String, val title: String, epochTime: Long, val reacts: Int, val comments: Int, val shares: Int): CsvRow(id, Instant.ofEpochSecond(epochTime)) {
+class FbPost(id: String, val title: String, epochTime: Long, val reacts: String, val comments: String, val shares: String): CsvRow(id, Instant.ofEpochSecond(epochTime)) {
     private fun formattedDate(): String {
         val date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
         return date.toLocalDate().toString()

@@ -1,5 +1,6 @@
 package parser
 
+import Util.normalizeNumber
 import models.CsvRow
 import models.Tweet
 import org.jsoup.Jsoup
@@ -24,7 +25,7 @@ open class TwitterParser: PageParser() {
                     val retweets = tweet.select("div[data-testid='retweet']").text()
                     val likes = tweet.select("div[data-testid='like']").text()
 
-                    val item = Tweet(id, text, Instant.parse(date), replies, retweets, likes)
+                    val item = Tweet(id, text, Instant.parse(date), replies.normalizeNumber(), retweets.normalizeNumber(), likes.normalizeNumber())
                     list.add(item)
                 } catch (ex: Exception) {
                     ex.printStackTrace()

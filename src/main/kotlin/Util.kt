@@ -196,4 +196,34 @@ object Util {
         val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
         return formatter.format(LocalDateTime.now()) + "." + ext
     }
+
+    /**
+     * parse number with count
+     * 43
+     * 4.3K
+     * 4.3M
+     * 1M
+     */
+    fun String?.normalizeNumber(): String {
+        if (this.isNullOrEmpty())
+            return "0"
+
+        try {
+
+            if (this.endsWith("K") || this.endsWith("M")) {
+                val value = this.substring(0, this.length - 1)
+
+                // expect dot
+                val float = value.toFloat()
+                val multiply = if (this.endsWith("K")) 1000 else 1000000
+                return (float * multiply).toLong().toString()
+            }
+
+            return this.toLong().toString()
+        } catch (ex: Exception) {
+            logException(ex)
+        }
+
+        return this
+    }
 }
