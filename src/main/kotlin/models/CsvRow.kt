@@ -7,4 +7,8 @@ abstract class CsvRow (val id: String, val instant: Instant) {
     abstract fun header(): String
 
     abstract fun  formatCsv(): String
+
+    override fun toString(): String {
+        return formatCsv()
+    }
 }

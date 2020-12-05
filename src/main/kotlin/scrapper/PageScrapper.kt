@@ -19,10 +19,10 @@ abstract class PageScrapper(val parser: PageParser) {
 
         beforeStarting()
         try {
-            driver.get(url);
+            driver.get(normalizeUrl(url));
 
             // wait for page to load
-            Thread.sleep(2000);
+            Thread.sleep(2000)
 
             // scroll and save to files
             val js = driver as JavascriptExecutor
@@ -55,6 +55,10 @@ abstract class PageScrapper(val parser: PageParser) {
         }
 
         return path
+    }
+
+    protected open fun normalizeUrl(url: String): String {
+        return url
     }
 
     private fun processSource(cachedIds: MutableSet<String>, path: String): Boolean {

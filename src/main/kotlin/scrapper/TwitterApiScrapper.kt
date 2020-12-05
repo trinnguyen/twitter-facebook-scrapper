@@ -1,16 +1,12 @@
 package scrapper
 
-import ULogger
 import ULogger.logError
 import ULogger.logException
 import ULogger.logInfo
 import Util
 import models.Tweet
 import parser.TwitterParser
-import twitter4j.Paging
-import twitter4j.Status
-import twitter4j.TwitterException
-import twitter4j.TwitterFactory
+import twitter4j.*
 import twitter4j.conf.ConfigurationBuilder
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -26,36 +22,41 @@ class TwitterApiScrapper : PageScrapper(TwitterParser()){
 
         // read config file
         val cb = updateTokens() ?: return null
+        val user = Util.getLastSegment(url) ?: return null
+        val path = Util.generatePathFromUrl(url, Util.generateFileNameByTime("csv")) ?: return null
 
         val twitter = TwitterFactory(cb.build()).instance
+        loadTimeline(twitter, user, path)
+
+        return path
+    }
+
+    private fun loadTimeline(twitter: Twitter, user: String, path: String) {
+        val ids = mutableSetOf<String>()
         var pageno = 1
-        val user = "samsung"
-        val list = mutableListOf<Tweet>()
-        val path = Util.generatePathFromUrl(url, Util.generateFileNameByTime("csv")) ?: return null
         while (true) {
             try {
                 val page = Paging(pageno++, 100)
                 val items = twitter.getUserTimeline(user, page)
-                logInfo("new items: ${items.size}")
-                if (items.isEmpty()) {
-                    logInfo("no new item is found")
+
+                // update
+                val rows = items.map { i -> toCsvRow(i) }.filter { i -> !ids.contains(i.id) }
+                logInfo("new items: ${rows.size}")
+                if (rows.isEmpty()) {
                     break
                 }
 
-                // update
-                val rows = items.map { i -> toCsvRow(i) }
-                list.addAll(rows)
-                logInfo("total ${list.size}")
+                // catch
+                rows.forEach { i -> ids.add(i.id) }
 
                 // append
+                logInfo("total ${ids.size}")
                 Util.appendCsvRowsToFile(rows, path)
             } catch (ex: TwitterException) {
                 logException(ex)
                 break
             }
         }
-
-        return path
     }
 
     private fun updateTokens(): ConfigurationBuilder? {
@@ -88,6 +89,13 @@ class TwitterApiScrapper : PageScrapper(TwitterParser()){
 
     private fun toCsvRow(status: Status): Tweet {
         val instant = status.createdAt.toInstant()
-        return Tweet(status.id.toString(), status.text, instant, "", status.retweetCount.toString(), status.favoriteCount.toString())
+        return Tweet(
+            status.id.toString(),
+            status.text.replace("\n"," ").replace(System.lineSeparator(), " "),
+            instant,
+            "",
+            status.retweetCount.toString(),
+            status.favoriteCount.toString()
+        )
     }
 }

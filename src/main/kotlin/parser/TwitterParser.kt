@@ -7,7 +7,7 @@ import org.jsoup.nodes.Element
 import java.time.Instant
 
 
-class TwitterParser: PageParser() {
+open class TwitterParser: PageParser() {
 
     fun parseTweets(source: String): List<Tweet> {
         try {

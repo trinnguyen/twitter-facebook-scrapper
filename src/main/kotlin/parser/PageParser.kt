@@ -17,7 +17,7 @@ abstract class PageParser {
         return null
     }
 
-    fun parseHtmlFileToCsv(source: String, csvPath: String): Boolean {
+    private fun parseHtmlFileToCsv(source: String, csvPath: String): Boolean {
         val list = parseToRows(source)
         Util.writeCsvRows(list, csvPath)
         logInfo("\t found ${list.size} items")

@@ -1,24 +1,33 @@
+import models.ProcessType
 import parser.FbPageParser
-import parser.MobileFacebookParser
 import parser.PageParser
 import parser.TwitterParser
+import parser.TwitterSearchParser
 import scrapper.*
+import java.lang.Exception
 
 
 object Factory {
-    fun createScrapper(url: String) : PageScrapper {
-        return when {
-            Util.isTwitterUrl(url) -> TwitterApiScrapper()
-            Util.isMobileFacebookUrl(url) -> MobileFacebookScrapper()
-            else -> FbPageScrapper()
+    fun createScrapper(type: ProcessType, url: String) : PageScrapper {
+        return when (type) {
+            ProcessType.Facebook -> FbPageScrapper()
+            ProcessType.Twitter -> TwitterScrapper()
+            ProcessType.TwitterApi -> TwitterApiScrapper()
+            ProcessType.TwitterSearch -> TwitterSearchScrapper()
+            else -> when {
+                Util.isMobileFacebookUrl(url) -> FbPageScrapper()
+                Util.isTwitterUrl(url) -> TwitterSearchScrapper()
+                else -> FbPageScrapper()
+            }
         }
     }
 
-    fun createParser(provider: String) : PageParser {
-        return when (provider) {
-            "twitter" -> TwitterParser()
-            "mbasic" -> MobileFacebookParser()
-            else -> FbPageParser()
+    fun createParser(type: ProcessType) : PageParser {
+        return when (type) {
+            ProcessType.Facebook -> FbPageParser()
+            ProcessType.Twitter -> TwitterParser()
+            ProcessType.TwitterApi -> throw Exception("not supported")
+            else -> TwitterSearchParser()
         }
     }
 }

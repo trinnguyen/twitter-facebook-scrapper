@@ -4,3 +4,4 @@ build/
 geckodriver
 geckodriver.*
 src-gen/
+tokens.txt

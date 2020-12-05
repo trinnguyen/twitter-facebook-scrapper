@@ -1,10 +1,6 @@
-import ULogger.logInfo
+import models.ProcessType
+import models.toProcessType
 import org.apache.commons.cli.*
-import twitter4j.Paging
-import twitter4j.Status
-import twitter4j.TwitterException
-import twitter4j.TwitterFactory
-import twitter4j.conf.ConfigurationBuilder
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -40,8 +36,7 @@ fun process(cli: CommandLine, path: String): Boolean {
 
     if (Util.isHtmlFile(path)) {
         // detect twitter or facebook
-        val provider = if (cli.hasOption('t')) cli.getOptionValue('t') else ""
-        val parser = Factory.createParser(provider)
+        val parser = Factory.createParser(cli.getProcessType())
         parser.parseHtmlFileToCsv(path)
         return true
     }
@@ -58,20 +53,19 @@ fun scrapPage(cli: CommandLine, path: String): Boolean {
             return false
     }
 
-    val profileName = if (cli.hasOption('p')) cli.getOptionValue('p') else "FbScrapper"
+    val profileName = cli.getOptionValue('p', "FbScrapper")
     System.setProperty("webdriver.firefox.driver", child.toAbsolutePath().toString());
     System.setProperty("webdriver.firefox.profile", profileName);
 
-    val scrapper = Factory.createScrapper(path)
+    val scrapper = Factory.createScrapper(cli.getProcessType(), path)
     val file: String? = scrapper.exec(path)
     return !file.isNullOrEmpty()
 }
 
 fun ensureValidArgs(cli: CommandLine): String? {
     if (cli.hasOption('t')) {
-        val value = cli.getOptionValue('t')
-        if (value != "twitter" && value != "facebook") {
-            return "type must be twitter or facebook, example '-t twitter'"
+        if (cli.getOptionValue('t', "").toProcessType() == ProcessType.None) {
+            return "invalid -t value"
         }
     }
 
@@ -97,7 +91,7 @@ fun createOptions(): Options {
         "t",
         "type",
         true,
-        "'facebook' or 'twitter'. Default is 'facebook'"
+        "Value: facebook, twitter, twitter-api, twitter-search"
     )
     options.addOption(
         "p",
@@ -129,4 +123,8 @@ fun printHelp(options: Options) {
     println("  fb-scrapper https://facebook.com/mashable")
     println("  fb-scrapper -p FbScrapper https://facebook.com/mashable")
     println("  fb-scrapper src-gen/facebook_com/mashable/200.html")
+}
+
+fun CommandLine.getProcessType(): ProcessType {
+    return this.getOptionValue('t', "").toProcessType()
 }

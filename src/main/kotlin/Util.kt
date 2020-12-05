@@ -168,7 +168,7 @@ object Util {
         return null
     }
 
-    private fun getLastSegment(path: String): String? {
+    fun getLastSegment(path: String): String? {
         try {
             val uri = URI(path)
             val segments = uri.path.split("/")
