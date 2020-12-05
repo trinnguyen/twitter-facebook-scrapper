@@ -41,7 +41,7 @@ object Util {
      */
     fun generatePathFromFile(file: String, ext: String): String? {
         val path = Paths.get(file)
-        val f = path.toFile()
+        val f = path.toAbsolutePath().toFile()
 
         val baseName = f.nameWithoutExtension
         return f.parentFile?.resolve("$baseName.$ext")?.toString()

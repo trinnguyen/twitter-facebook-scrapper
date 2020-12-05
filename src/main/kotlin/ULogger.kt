@@ -9,12 +9,12 @@ import org.slf4j.LoggerFactory
 
 object ULogger {
 
-    lateinit var logger: ch.qos.logback.classic.Logger
+    private val ctx = LoggerFactory.getILoggerFactory() as LoggerContext
+
+    var logger: ch.qos.logback.classic.Logger = ctx.getLogger(ULogger.javaClass.name)
 
     fun setup(logPath: String) {
         println("logging to $logPath")
-
-        val ctx = LoggerFactory.getILoggerFactory() as LoggerContext
 
         val ple = PatternLayoutEncoder()
         ple.pattern = "%-12date{YYYY-MM-dd HH:mm:ss.SSS} %-5level - %msg%n";
@@ -33,7 +33,7 @@ object ULogger {
         logConsoleAppender.encoder = ple
         logConsoleAppender.start()
 
-        logger = ctx.getLogger(ULogger.javaClass.name)
+
         logger.level = Level.ALL
         logger.addAppender(logConsoleAppender)
         logger.addAppender(fileAppender)
