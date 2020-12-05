@@ -6,19 +6,18 @@ import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.firefox.FirefoxDriver
 import parser.PageParser
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.*
 
 abstract class PageScrapper(val parser: PageParser) {
     protected val driver: WebDriver = FirefoxDriver()
 
-    val queue = ArrayDeque<String>()
+    fun exec(url: String): String? {
+        val cachedIds = mutableSetOf<String>()
+        val fileName = Util.generateFileNameByTime("csv")
+        val path = Util.generatePathFromUrl(url, fileName) ?: return null
 
-    fun exec(url: String, countCsv: Int): String? {
-        logInfo("start scrapping: $url")
+        logInfo("start scrapping $url to $path")
+
         beforeStarting()
-        queue.clear()
         try {
             driver.get(url);
 
@@ -28,11 +27,22 @@ abstract class PageScrapper(val parser: PageParser) {
             // scroll and save to files
             val js = driver as JavascriptExecutor
             var count = 1
+            var countFailed = 0
             while (true) {
 
                 // hide modal if needed
-                processSource(url, count, countCsv)
                 onScrolling()
+
+                // process
+                if (processSource(cachedIds, path)) {
+                    countFailed = 0
+                } else {
+                    countFailed++
+                    if (countFailed == 30) {
+                        logInfo("no items parsed after 30 attempts, finishing")
+                        return path
+                    }
+                }
 
                 // scroll to next
                 val y = count++ * 2000
@@ -46,32 +56,32 @@ abstract class PageScrapper(val parser: PageParser) {
             driver.quit()
         }
 
-        return queue.last
+        return path
     }
 
-    private fun processSource(url: String, count: Int, countCsv: Int) {
-        if (shouldProcess(count)) {
-            val result: String? = parseToCsv(driver.pageSource, url, count)
-            if (!result.isNullOrEmpty()) {
-                // delete last csv file
-                queue.add(result)
-                if (queue.size > countCsv) {
-                    val tmpFile = queue.remove()
-                    try {
-                        Files.delete(Paths.get(tmpFile))
-                        logInfo("deleted csv: $tmpFile")
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    }
-                }
-            }
+    private fun processSource(cachedIds: MutableSet<String>, path: String): Boolean {
+
+        // process every single scroll
+        val items: List<CsvRow> = parser.parseToRows(getSource())
+        val newItems = items.filter { i -> !cachedIds.contains(i.id) }.sortedByDescending { i -> i.instant }
+        logInfo("found ${newItems.size} new items, total: ${cachedIds.size + newItems.size} ")
+        if (newItems.isEmpty())
+            return false
+
+        // cache items
+        newItems.forEach { i ->
+            cachedIds.add(i.id)
+            logInfo(i.formatCsv())
         }
+
+        // append to csv file
+        Util.appendCsvRowsToFile(newItems, path)
+        return true
     }
 
-    abstract fun shouldProcess(count: Int): Boolean
-
-    abstract fun parseToCsv(pageSource: String?, url: String, count: Int): String?;
+    abstract fun getSource(): String;
 
     protected open fun beforeStarting() {}
+
     protected open fun onScrolling() {}
 }

@@ -1,7 +1,10 @@
 package models
 
-interface CsvRow {
-    fun header(): String
+import java.time.Instant
 
-    fun formatCsv(): String
+abstract class CsvRow (val id: String, val instant: Instant) {
+
+    abstract fun header(): String
+
+    abstract fun  formatCsv(): String
 }

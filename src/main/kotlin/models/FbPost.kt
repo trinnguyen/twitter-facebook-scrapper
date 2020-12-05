@@ -6,15 +6,13 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
-data class FbPost(val title: String, val epochTime: Long, val reacts: Int, val comments: Int, val shares: Int): CsvRow {
-    fun formattedDate(): String {
-        val instant = Instant.ofEpochSecond(epochTime)
+class FbPost(id: String, val title: String, epochTime: Long, val reacts: Int, val comments: Int, val shares: Int): CsvRow(id, Instant.ofEpochSecond(epochTime)) {
+    private fun formattedDate(): String {
         val date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
         return date.toLocalDate().toString()
     }
 
-    fun formattedTime(): String {
-        val instant = Instant.ofEpochSecond(epochTime)
+    private fun formattedTime(): String {
         val date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
         val dtf = DateTimeFormatter.ofPattern("HH:mm")
         return dtf.format(date.toLocalTime())

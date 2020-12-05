@@ -67,7 +67,7 @@ fun scrapPage(isTwitter: Boolean, cli: CommandLine, path: String): Boolean {
     val countCsv = getCountCsv(cli, 10)
 
     val scrapper: PageScrapper = if (isTwitter) TwitterScrapper() else FbPageScrapper()
-    val file: String? = scrapper.exec(path, countCsv)
+    val file: String? = scrapper.exec(path)
     return !file.isNullOrEmpty()
 }
 

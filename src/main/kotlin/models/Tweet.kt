@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-class Tweet(val id: String, val text: String, val instant: Instant, val replies: String, val retweets: String, val likes: String): CsvRow {
+class Tweet(id: String, val text: String, instant: Instant, val replies: String, val retweets: String, val likes: String): CsvRow(id, instant) {
 
     override fun header(): String {
         return "Link,Text,Date,Time,Replies,Retweets,Likes"

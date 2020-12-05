@@ -6,7 +6,11 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
 import java.nio.file.Files
+import java.nio.file.OpenOption
 import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 object Util {
@@ -54,7 +58,8 @@ object Util {
                 "src-gen",
                 uri.host.replace(".", "_"),
                 uri.path.trim('/').replace("/", "_"),
-                filename)
+                filename
+            )
 
             // create folder if needed
             val parent = path.toFile().parentFile;
@@ -86,6 +91,25 @@ object Util {
 
         Files.writeString(path, builder.toString())
         logInfo("wrote CSV to file $path")
+    }
+
+    fun appendCsvRowsToFile(items: List<CsvRow>, csvPath: String) {
+        if (items.isEmpty())
+            return
+
+        val path = Paths.get(csvPath)
+        val builder = StringBuilder()
+        val isExist = path.toFile().exists()
+        if (!isExist) {
+            builder.append(items.first().header()).append(System.lineSeparator())
+        }
+        items.forEach {
+            builder.append(it.formatCsv()).append(System.lineSeparator())
+        }
+
+        Files.writeString(path, builder.toString(), if (isExist) StandardOpenOption.APPEND else StandardOpenOption.CREATE)
+        logInfo("appended items to CSV file $path")
+        logInfo("")
     }
 
     fun isTwitterPath(link: String): Boolean {
@@ -154,5 +178,10 @@ object Util {
         }
 
         return null
+    }
+
+    fun generateFileNameByTime(ext: String): String {
+        val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+        return formatter.format(LocalDateTime.now()) + "." + ext
     }
 }

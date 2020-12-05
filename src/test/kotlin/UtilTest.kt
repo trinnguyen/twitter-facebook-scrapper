@@ -36,4 +36,17 @@ class UtilTest {
     fun isTwitterPath(input: String, result: Boolean) {
         assertEquals(result, Util.isTwitterPath(input))
     }
+
+    @ParameterizedTest
+    @CsvSource(
+        value = [
+            "https://www.twitter.com/samsung, src-gen/www_twitter_com/samsung/samsung.log",
+            "https://facebook.com/apple, src-gen/facebook_com/apple/apple.log",
+            "src-gen/twitter_com/apple/tweets.html, src-gen/twitter_com/apple/tweets.log",
+            "src-gen/facebook_com/apple/posts.html, src-gen/facebook_com/apple/posts.log",
+        ]
+    )
+    fun generateLogPath(input: String, result: String) {
+        assertEquals(result, Util.generateLogPath(input))
+    }
 }

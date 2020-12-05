@@ -7,6 +7,7 @@ import org.jsoup.Jsoup
 class FbPageParser: PageParser() {
 
     override fun parseToRows(source: String): List<CsvRow> {
+        var id = 1
         try {
             // get
             val doc = Jsoup.parse(source)
@@ -52,7 +53,7 @@ class FbPageParser: PageParser() {
                 }
 
                 // item
-                val post = FbPost(title, time, reacts, comments, shares)
+                val post = FbPost("${id++}", title, time, reacts, comments, shares)
                 list.add(post)
             }
 
