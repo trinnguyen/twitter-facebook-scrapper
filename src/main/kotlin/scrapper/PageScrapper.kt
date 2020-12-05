@@ -1,5 +1,6 @@
 package scrapper
 
+import ULogger.logInfo
 import models.CsvRow
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
@@ -15,7 +16,7 @@ abstract class PageScrapper(val parser: PageParser) {
     val queue = ArrayDeque<String>()
 
     fun exec(url: String, countCsv: Int): String? {
-        println("start scrapping: $url")
+        logInfo("start scrapping: $url")
         beforeStarting()
         queue.clear()
         try {
@@ -58,7 +59,7 @@ abstract class PageScrapper(val parser: PageParser) {
                     val tmpFile = queue.remove()
                     try {
                         Files.delete(Paths.get(tmpFile))
-                        println("deleted csv: $tmpFile")
+                        logInfo("deleted csv: $tmpFile")
                     } catch (ex: Exception) {
                         ex.printStackTrace()
                     }

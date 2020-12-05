@@ -1,10 +1,11 @@
+import ULogger.logException
+import ULogger.logInfo
 import models.CsvRow
 import java.io.File
 import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 
 
@@ -25,38 +26,52 @@ object Util {
             return false
 
         if (result == 0) {
-            println("Successfully download and extract geckodriver")
+            logInfo("Successfully download and extract geckodriver")
         }
 
         return true
     }
 
-    fun getCsvFile(file: String): String? {
+    /**
+     * generate path for file
+     */
+    fun generatePathFromFile(file: String, ext: String): String? {
         val path = Paths.get(file)
         val f = path.toFile()
-        if (!f.exists()) return null
 
         val baseName = f.nameWithoutExtension
-        return Paths.get(f.parentFile.absolutePath, "$baseName.csv").toAbsolutePath().toString()
+        return f.parentFile?.resolve("$baseName.$ext")?.toString()
     }
 
-    fun getPath(url: String, count: Int, ext: String): Path {
-        val uri = URI(url)
+    /**
+     * generate path from URL
+     * https://facebook_com/apple => src-gen/facebook_com/apple.ext
+     */
+    fun generatePathFromUrl(url: String, filename: String): String? {
+        try {
+            val uri = URI(url)
+            val path = Paths.get(
+                "src-gen",
+                uri.host.replace(".", "_"),
+                uri.path.trim('/').replace("/", "_"),
+                filename)
 
-        // path: src-gen/facebook_com/apple/
-        val filename = "$count.$ext"
-        val path = Paths.get(
-            "src-gen",
-            uri.host.replace(".", "_"),
-            uri.path.trim('/').replace("/", "_"),
-            filename)
+            // create folder if needed
+            val parent = path.toFile().parentFile;
+            if (!parent.exists()) {
+                parent.mkdirs()
+            }
 
-        val parent = path.toFile().parentFile;
-        if (!parent.exists()) {
-            parent.mkdirs()
+            return path.toString()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
         }
+        return null
+    }
 
-        return path
+    fun generatePath(url: String, count: Int, ext: String): String? {
+        val filename = "$count.$ext"
+        return generatePathFromUrl(url, filename)
     }
 
     fun writeCsvRows(items: List<CsvRow>, csvPath: String) {
@@ -70,7 +85,7 @@ object Util {
         }
 
         Files.writeString(path, builder.toString())
-        println("wrote CSV to file $path")
+        logInfo("wrote CSV to file $path")
     }
 
     fun isTwitterPath(link: String): Boolean {
@@ -113,8 +128,31 @@ object Util {
         try {
             function.invoke()
             return true;
-        } catch (ex: java.lang.Exception) {
+        } catch (ex: Exception) {
         }
         return false;
+    }
+
+    fun generateLogPath(path: String): String? {
+        if (isValidUrl(path)) {
+            val lastPart = getLastSegment(path) ?: return null
+            return generatePathFromUrl(path, "$lastPart.log")
+        } else if (isHtmlFile(path)) {
+            return generatePathFromFile(path, "log")
+        }
+
+        return null
+    }
+
+    private fun getLastSegment(path: String): String? {
+        try {
+            val uri = URI(path)
+            val segments = uri.path.split("/")
+            return segments.lastOrNull()
+        } catch (ex: Exception) {
+            logException(ex)
+        }
+
+        return null
     }
 }

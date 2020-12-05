@@ -3,8 +3,6 @@ package scrapper
 import Util
 import org.openqa.selenium.By
 import parser.FbPageParser
-import java.nio.file.Files
-import java.nio.file.Paths
 
 class FbPageScrapper : PageScrapper(FbPageParser()) {
 
@@ -18,10 +16,11 @@ class FbPageScrapper : PageScrapper(FbPageParser()) {
             return null
 
         try {
-            val csvPath = Util.getPath(url, count, "csv")
-            val filePath = csvPath.toAbsolutePath().toString()
-            if (parser.parseToCsv(pageSource, filePath)) {
-                return filePath
+            val filePath = Util.generatePath(url, count, "csv")
+            if (filePath != null) {
+                if (parser.parseHtmlFileToCsv(pageSource, filePath)) {
+                    return filePath
+                }
             }
 
         } catch (ex: Exception) {

@@ -29,7 +29,7 @@ class TwitterScrapper : PageScrapper(TwitterParser()) {
 
             // write to file
             val sorted = map.values.sortedByDescending { i -> i.instant }
-            val path = Util.getPath(url, count, "csv").toString()
+            val path = Util.generatePath(url, count, "csv").toString()
             Util.writeCsvRows(sorted, path)
             return path
         }

@@ -1,3 +1,4 @@
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -12,14 +13,19 @@ repositories {
     maven("https://kotlin.bintray.com/kotlinx")
 }
 dependencies {
-    testImplementation(kotlin("test-junit5"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.0")
     implementation("org.seleniumhq.selenium:selenium-firefox-driver:3.141.59")
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("commons-cli:commons-cli:1.4")
+    implementation("ch.qos.logback:logback-classic:1.3.0-alpha5")
 }
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
 }
 application {
     mainClassName = "MainKt"
+}
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

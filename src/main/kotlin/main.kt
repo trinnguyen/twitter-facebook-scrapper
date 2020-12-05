@@ -11,6 +11,7 @@ import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
+
     // parse and validate
     val opts = createOptions()
     val cli = parseCli(opts, args) ?: exitProcess(1)
@@ -21,6 +22,8 @@ fun main(args: Array<String>) {
     }
 
     val path = cli.argList.first()
+
+    ULogger.setup(path)
 
     // scrap page
     if (!process(cli, path)) {
@@ -52,7 +55,7 @@ fun scrapPage(isTwitter: Boolean, cli: CommandLine, path: String): Boolean {
     val folder = File(File("").absolutePath)
     val child = Paths.get(folder.absolutePath, "geckodriver")
     if (!Files.exists(child)) {
-        println("geckodriver is not exist, auto download to ${child}")
+        ULogger.logInfo("geckodriver is not exist, auto download to ${child}")
         if (!Util.downloadGeckoDriver(folder))
             return false
     }
@@ -83,7 +86,7 @@ fun getCountCsv(cli: CommandLine, def: Int): Int {
 
 fun parsePage(isTwitter: Boolean, path: String): Boolean {
     val parser: PageParser = if (isTwitter) TwitterParser() else FbPageParser()
-    parser.parseToCsv(path)
+    parser.parseHtmlFileToCsv(path)
     return true
 }
 
@@ -147,6 +150,7 @@ fun printHelp(options: Options) {
 
     println("")
     println("examples:")
+    println("  fb-scrapper https://twitter/samsung")
     println("  fb-scrapper -n 50 https://www.facebook.com/samsungelectronics")
     println("  fb-scrapper src-gen/facebook_com/mashable/200.html")
 }
