@@ -46,7 +46,7 @@ fun scrapPage(cli: CommandLine, path: String): Boolean {
     val folder = File(File("").absolutePath)
     val driver = Factory.createWebDriver(cli, folder)
 
-    val scrapper = Factory.createScrapper(cli.getProcessType(), path)
+    val scrapper = Factory.createScrapper(cli, path)
     val file: String? = scrapper.exec(path, driver)
     return !file.isNullOrEmpty()
 }
@@ -89,6 +89,9 @@ fun createOptions(): Options {
     options.addOption("d",
         true,
         "Use 'chrome' or 'firefox'. Default is 'firefox'")
+    options.addOption("s",
+        true,
+        "Scrolling speed for Twitter only, default is 1. Example value: 1.5 or 2")
     return options
 }
 
@@ -110,9 +113,9 @@ fun printHelp(options: Options) {
     println("")
     println("examples:")
     println("  fb-scrapper https://twitter.com/samsung")
+    println("  fb-scrapper -t twitter https://twitter.com/samsung")
+    println("  fb-scrapper -t twitter-api https://twitter.com/samsung")
     println("  fb-scrapper https://facebook.com/mashable")
-    println("  fb-scrapper -p FbScrapper https://facebook.com/mashable")
-    println("  fb-scrapper src-gen/facebook_com/mashable/200.html")
 }
 
 fun CommandLine.getProcessType(): ProcessType {
@@ -121,4 +124,9 @@ fun CommandLine.getProcessType(): ProcessType {
 
 fun CommandLine.isChromeDriver(): Boolean {
     return this.getOptionValue('d', "firefox").equals("chrome", true)
+}
+
+fun CommandLine.getTwitterScrollingSpeed(): Long {
+    val def: Long = 3600
+    return this.getOptionValue('s', def.toString()).toLongOrNull() ?: def
 }

@@ -13,15 +13,16 @@ import java.nio.file.Paths
 
 
 object Factory {
-    fun createScrapper(type: ProcessType, url: String) : PageScrapper {
-        return when (type) {
+    fun createScrapper(cli: CommandLine, url: String) : PageScrapper {
+        val speed = cli.getTwitterScrollingSpeed()
+        return when (cli.getProcessType()) {
             ProcessType.Facebook -> FbPageScrapper()
-            ProcessType.Twitter -> TwitterScrapper()
+            ProcessType.Twitter -> TwitterScrapper(speed)
             ProcessType.TwitterApi -> TwitterApiScrapper()
-            ProcessType.TwitterSearch -> TwitterSearchScrapper()
+            ProcessType.TwitterSearch -> TwitterSearchScrapper(speed)
             else -> when {
                 Util.isMobileFacebookUrl(url) -> FbPageScrapper()
-                Util.isTwitterUrl(url) -> TwitterSearchScrapper()
+                Util.isTwitterUrl(url) -> TwitterSearchScrapper(speed)
                 else -> FbPageScrapper()
             }
         }

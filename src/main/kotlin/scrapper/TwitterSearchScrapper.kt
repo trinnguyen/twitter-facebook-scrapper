@@ -4,7 +4,7 @@ import ULogger.logException
 import java.lang.Exception
 import java.net.URI
 
-class TwitterSearchScrapper: TwitterScrapper() {
+class TwitterSearchScrapper(speed: Long): TwitterScrapper(speed) {
 
     override fun normalizeUrl(url: String): String {
         try {
