@@ -192,9 +192,13 @@ object Util {
         return null
     }
 
-    fun generateFileNameByTime(ext: String): String {
+    fun generateFileNameByTime(): String {
         val formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
-        return formatter.format(LocalDateTime.now()) + "." + ext
+        return formatter.format(LocalDateTime.now())
+    }
+
+    fun generateFileNameByTime(ext: String): String {
+        return generateFileNameByTime() + "." + ext
     }
 
     /**

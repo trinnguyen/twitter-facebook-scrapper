@@ -1,11 +1,17 @@
 package scrapper
 
+import ULogger.logException
 import ULogger.logInfo
 import Util
 import models.CsvRow
 import org.openqa.selenium.JavascriptExecutor
+import org.openqa.selenium.OutputType
+import org.openqa.selenium.TakesScreenshot
 import org.openqa.selenium.WebDriver
 import parser.PageParser
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 abstract class PageScrapper(val parser: PageParser) {
     protected lateinit var driver: WebDriver
@@ -13,7 +19,8 @@ abstract class PageScrapper(val parser: PageParser) {
     open fun exec(url: String, provider: () -> WebDriver): String? {
         this.driver = provider()
         val cachedIds = mutableSetOf<String>()
-        val path = Util.generatePathFromUrl(url, Util.generateFileNameByTime("csv")) ?: return null
+        val baseName = Util.generateFileNameByTime()
+        val path = Util.generatePathFromUrl(url, "$baseName.csv") ?: return null
 
         logInfo("start scrapping $url to $path")
 
@@ -38,7 +45,8 @@ abstract class PageScrapper(val parser: PageParser) {
                 } else {
                     countFailed++
                     if (countFailed == 30) {
-                        logInfo("no items parsed after 30 attempts, finishing")
+                        logInfo("no items parsed after 30 attempts, finish with total ${cachedIds.size} items")
+                        onFinishing(url, baseName)
                         return path
                     }
                 }
@@ -49,12 +57,26 @@ abstract class PageScrapper(val parser: PageParser) {
             }
 
         } catch (ex: Exception) {
-            ex.printStackTrace()
+            logException(ex)
         } finally {
              this.driver.quit()
         }
 
         return path
+    }
+
+    private fun onFinishing(url: String, baseName: String) {
+        if (driver is TakesScreenshot) {
+            try {
+                val tmpFile = (driver as TakesScreenshot).getScreenshotAs(OutputType.FILE)
+                Util.generatePathFromUrl(url, "$baseName.png")?.let {
+                    Files.move(tmpFile.toPath(), Paths.get(it))
+                    logInfo("took screenshot to $it")
+                }
+            } catch (ex: Exception) {
+                logException(ex)
+            }
+        }
     }
 
     open fun getDelayMiliSeconds(): Long {
@@ -74,7 +96,7 @@ abstract class PageScrapper(val parser: PageParser) {
         // process every single scroll
         val items: List<CsvRow> = parser.parseToRows(getSource())
         val newItems = items.filter { i -> !cachedIds.contains(i.id) }.sortedByDescending { i -> i.instant }
-        logInfo("found ${newItems.size} new items")
+        logInfo("found ${newItems.size} new items, ${items.size - newItems.size} old items")
         if (newItems.isEmpty())
             return false
 
