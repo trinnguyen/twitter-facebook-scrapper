@@ -20,7 +20,3 @@ jobs:
           java-version: 11.0.7
       - run: chmod +x gradlew
       - run: ./gradlew build
-      - uses: actions/upload-artifact@v2
-        with:
-          name: fb-scrapper-1.0.0.zip
-          path: build/distributions/fb-scrapper-1.0.0.zip
