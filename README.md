@@ -6,7 +6,7 @@ Scrapper tool to collect the public posts from Facebook and tweets from Twitter 
 - Collect unlimitted public Facebook posts of a page
 - Output entries to CSV file in real-time
 - Developed in Kotlin, targets JVM, use geckodriver (a WebDriver for Firefox)
-- Cross-platform tool run on macOS, Windows, Linux
+- Cross-platform tool for on macOS, Windows, Linux
 
 ## usage
 ```shell
