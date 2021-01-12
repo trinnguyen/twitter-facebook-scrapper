@@ -1,5 +1,11 @@
-# facebook-page-scrapper
-Scrap public posts from Facebook Page using GeckoDriver
+# twitter-facebook-scrapper
+Scrapper tool to collect the public posts from Facebook and tweets from Twitter using Selenium Firebase WebDriver
+
+## Features
+- Collect unlimitted public Twitter tweets of a specific profile
+- Collect unlimitted public Facebook posts of a page
+- Output entries to CSV file in real-time
+- Developed in Kotlin, targets JVM, use geckodriver (a WebDriver for Firefox)
 
 
 ## usage
